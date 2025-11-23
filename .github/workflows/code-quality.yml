@@ -1,0 +1,33 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-analysis:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore --configuration Release
+      
+    - name: Run Code Analysis
+      run: dotnet build /p:EnforceCodeStyleInBuild=true /p:TreatWarningsAsErrors=false
+      
+    - name: Check formatting
+      run: dotnet format --verify-no-changes --verbosity diagnostic
+      continue-on-error: true

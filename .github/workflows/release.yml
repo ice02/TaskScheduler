@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Extract version from tag
+      id: get_version
+      run: |
+        $version = $env:GITHUB_REF -replace 'refs/tags/v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+      shell: pwsh
+      
+    - name: Build Release
+      run: dotnet publish TaskScheduler/TaskScheduler.csproj -c Release -o publish/TaskScheduler --self-contained false -r win-x64
+      
+    - name: Copy documentation and scripts
+      run: |
+        Copy-Item "TaskScheduler/README.md" "publish/TaskScheduler/"
+        Copy-Item "TaskScheduler/QUICKSTART.md" "publish/TaskScheduler/"
+        Copy-Item "TaskScheduler/DEPLOYMENT.md" "publish/TaskScheduler/"
+        Copy-Item "TaskScheduler/EXAMPLES.md" "publish/TaskScheduler/"
+        Copy-Item "TaskScheduler/ARCHITECTURE.md" "publish/TaskScheduler/"
+        Copy-Item "TaskScheduler/CHANGELOG.md" "publish/TaskScheduler/"
+        Copy-Item "TaskScheduler/Scripts" "publish/TaskScheduler/Scripts" -Recurse
+      shell: pwsh
+      
+    - name: Create deployment package
+      run: |
+        Compress-Archive -Path "publish/TaskScheduler/*" -DestinationPath "TaskScheduler-${{ steps.get_version.outputs.VERSION }}.zip"
+      shell: pwsh
+      
+    - name: Generate release notes
+      id: release_notes
+      run: |
+        $notes = Get-Content "TaskScheduler/CHANGELOG.md" -Raw
+        $notes | Out-File -FilePath release_notes.md -Encoding utf8
+      shell: pwsh
+      
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          TaskScheduler-${{ steps.get_version.outputs.VERSION }}.zip
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

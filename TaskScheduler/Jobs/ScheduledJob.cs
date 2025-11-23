@@ -10,8 +10,8 @@ public class ScheduledJob : IInvocable
 
     public ScheduledJob(JobConfiguration configuration, Services.JobExecutionService executionService)
     {
-        _configuration = configuration;
-        _executionService = executionService;
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _executionService = executionService ?? throw new ArgumentNullException(nameof(executionService));
     }
 
     public async Task Invoke()

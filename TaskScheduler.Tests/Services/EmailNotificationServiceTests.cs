@@ -75,45 +75,41 @@ public class EmailNotificationServiceTests
     }
 
     [Fact]
-    public void Constructor_ShouldAcceptNullSmtpSettings()
+    public void Constructor_WithNullSmtpSettings_ShouldThrow()
     {
         // Arrange & Act
-        var service = new EmailNotificationService(null!, _loggerMock.Object);
+        var act = () => new EmailNotificationService(null!, _loggerMock.Object);
 
         // Assert
-        service.Should().NotBeNull();
+        act.Should().Throw<ArgumentNullException>();
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task SendErrorNotificationAsync_WithEmptySubject_ShouldNotThrow(string? subject)
+    [Fact]
+    public async Task SendErrorNotificationAsync_WithNullSubject_ShouldThrow()
     {
         // Arrange
         var settings = new SmtpSettings { Enabled = false };
         var service = new EmailNotificationService(settings, _loggerMock.Object);
 
         // Act
-        var act = async () => await service.SendErrorNotificationAsync(subject!, "Body");
+        var act = async () => await service.SendErrorNotificationAsync(null!, "Body");
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task SendErrorNotificationAsync_WithEmptyBody_ShouldNotThrow(string? body)
+    [Fact]
+    public async Task SendErrorNotificationAsync_WithNullBody_ShouldThrow()
     {
         // Arrange
         var settings = new SmtpSettings { Enabled = false };
         var service = new EmailNotificationService(settings, _loggerMock.Object);
 
         // Act
-        var act = async () => await service.SendErrorNotificationAsync("Subject", body!);
+        var act = async () => await service.SendErrorNotificationAsync("Subject", null!);
 
         // Assert
-        await act.Should().NotThrowAsync();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
@@ -122,7 +118,7 @@ public class EmailNotificationServiceTests
         // Arrange
         var settings = new SmtpSettings
         {
-            Enabled = false, // Disabled to avoid actual SMTP connection
+            Enabled = false,
             ToEmails = new List<string>
             {
                 "admin1@example.com",
@@ -135,7 +131,7 @@ public class EmailNotificationServiceTests
         // Act
         await service.SendErrorNotificationAsync("Test", "Body");
 
-        // Assert - Should log that notifications are disabled
+        // Assert
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Debug,
@@ -147,7 +143,7 @@ public class EmailNotificationServiceTests
     }
 
     [Fact]
-    public void EmailNotificationService_ShouldHandleNullLogger()
+    public void EmailNotificationService_WithNullLogger_ShouldThrow()
     {
         // Arrange
         var settings = new SmtpSettings { Enabled = false };

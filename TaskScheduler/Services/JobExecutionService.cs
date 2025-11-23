@@ -14,12 +14,14 @@ public class JobExecutionService
 
     public JobExecutionService(ILogger<JobExecutionService> logger, EmailNotificationService emailService)
     {
-        _logger = logger;
-        _emailService = emailService;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
     }
 
     public async Task ExecuteJobAsync(JobConfiguration job)
     {
+        ArgumentNullException.ThrowIfNull(job);
+
         if (!job.Enabled)
         {
             _logger.LogDebug("Job {JobName} is disabled, skipping execution", job.Name);

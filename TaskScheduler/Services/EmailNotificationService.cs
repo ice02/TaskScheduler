@@ -13,12 +13,15 @@ public class EmailNotificationService
 
     public EmailNotificationService(SmtpSettings smtpSettings, ILogger<EmailNotificationService> logger)
     {
-        _smtpSettings = smtpSettings;
-        _logger = logger;
+        _smtpSettings = smtpSettings ?? throw new ArgumentNullException(nameof(smtpSettings));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task SendErrorNotificationAsync(string subject, string body)
     {
+        ArgumentNullException.ThrowIfNull(subject);
+        ArgumentNullException.ThrowIfNull(body);
+
         if (!_smtpSettings.Enabled)
         {
             _logger.LogDebug("Email notifications are disabled");

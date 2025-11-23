@@ -18,8 +18,12 @@ public class JobSchedulerService : BackgroundService
         IServiceProvider serviceProvider,
         IConfiguration configuration)
     {
-        _logger = logger;
-        _serviceProvider = serviceProvider;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+
+        if (configuration == null)
+            throw new ArgumentNullException(nameof(configuration));
+
         _jobs = configuration.GetSection("Jobs").Get<List<JobConfiguration>>() ?? new List<JobConfiguration>();
     }
 

@@ -29,16 +29,10 @@ jobs:
       shell: pwsh
       
     - name: Build Release
-      run: dotnet publish TaskScheduler/TaskScheduler.csproj -c Release -o publish/TaskScheduler --self-contained false -r win-x64
+      run: dotnet publish TaskScheduler/TaskScheduler.csproj -c Release -o publish/TaskScheduler --self-contained true -r win-x64
       
     - name: Copy documentation and scripts
       run: |
-        Copy-Item "TaskScheduler/README.md" "publish/TaskScheduler/"
-        Copy-Item "TaskScheduler/QUICKSTART.md" "publish/TaskScheduler/"
-        Copy-Item "TaskScheduler/DEPLOYMENT.md" "publish/TaskScheduler/"
-        Copy-Item "TaskScheduler/EXAMPLES.md" "publish/TaskScheduler/"
-        Copy-Item "TaskScheduler/ARCHITECTURE.md" "publish/TaskScheduler/"
-        Copy-Item "TaskScheduler/CHANGELOG.md" "publish/TaskScheduler/"
         Copy-Item "TaskScheduler/Scripts" "publish/TaskScheduler/Scripts" -Recurse
       shell: pwsh
       
